@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Upload PowerPoint</title>
+    <style>
+      #progress-container {
+        display: none;
+        width: 100%;
+        background-color: #f3f3f3;
+      }
+      #progress-bar {
+        width: 0%;
+        height: 30px;
+        background-color: #4caf50;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Upload PowerPoint File</h1>
+      <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file" id="file-input">
+        <input type="button" value="Upload" onclick="uploadFile()">
+      </form>
+      <div id="progress-container">
+        <div id="progress-bar">0%</div>
+      </div>
+      <div id="download-link" style="display:none;">
+        <p><a id="download-url" href="#">Click here to download the modified PowerPoint file</a></p>
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+  </body>
+</html>
