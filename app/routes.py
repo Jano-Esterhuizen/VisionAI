@@ -1,15 +1,17 @@
 import os
-from flask import render_template, request, send_file, jsonify, current_app
+import logging
+from flask import Blueprint, send_file, jsonify, current_app, request
 from werkzeug.utils import secure_filename
-from app import app
 from app.utils.file_handlers import extract_images_from_pptx, insert_alt_text
 from app.utils.image_processing import describe_image
 
-@app.route('/')
-def index():
-    return render_template('upload.html')
+bp = Blueprint('main', __name__)
 
-@app.route('/upload', methods=['POST'])
+@bp.route('/')
+def index():
+    return "Hello, World!"  # Or render your template here
+
+@bp.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -20,21 +22,33 @@ def upload_file():
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
     
-    images = extract_images_from_pptx(filepath, current_app.config['OUTPUT_FOLDER'])
-    
-    descriptions = []
-    for slide_number, shape_number, image_path in images:
-        description = describe_image(image_path)
-        descriptions.append((slide_number, shape_number, description))
+    try:
+        images = extract_images_from_pptx(filepath, current_app.config['OUTPUT_FOLDER'])
+        
+        descriptions = []
+        for slide_number, shape_number, image_path in images:
+            description = describe_image(image_path)
+            descriptions.append((slide_number, shape_number, description))
 
-    modified_filepath = insert_alt_text(filepath, descriptions)
-    modified_filename = os.path.basename(modified_filepath)
-    return jsonify({"filename": modified_filename})
+        modified_filepath = insert_alt_text(filepath, descriptions)
+        modified_filename = os.path.basename(modified_filepath)
+        return jsonify({"filename": modified_filename})
+    except Exception as e:
+        logging.error(f"Error processing file: {str(e)}")
+        return jsonify({"error": "Error processing file"}), 500
 
-@app.route('/download/<filename>')
+@bp.route('/download/<filename>')
 def download_file(filename):
     file_path = os.path.join(current_app.config['OUTPUT_FOLDER'], filename)
-    print(f"Attempting to download file: {file_path}")
+    logging.info(f"Attempting to download file: {file_path}")
+    
     if not os.path.exists(file_path):
+        logging.error(f"File not found: {file_path}")
         return jsonify({"error": f"File not found: {filename}"}), 404
-    return send_file(file_path, as_attachment=True)
+    
+    try:
+        logging.info(f"Sending file: {file_path}")
+        return send_file(file_path, as_attachment=True)
+    except Exception as e:
+        logging.exception(f"Error sending file: {str(e)}")
+        return jsonify({"error": "Error sending file"}), 500
