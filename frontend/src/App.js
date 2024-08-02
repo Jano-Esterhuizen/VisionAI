@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { AlertCircle, Upload, Download } from 'lucide-react';
+import ImageEditor from './components/ImageEditor';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -8,6 +9,9 @@ function App() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [downloadLink, setDownloadLink] = useState(null);
   const [error, setError] = useState(null);
+  const [images, setImages] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [promptType, setPromptType] = useState('general');
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -25,6 +29,10 @@ function App() {
   
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('promptType', promptType);
+  
+    console.log('Uploading file:', file.name);
+    console.log('Prompt type:', promptType);
   
     try {
       const response = await axios.post('/upload', formData, {
@@ -37,21 +45,47 @@ function App() {
         }
       });
   
-      console.log('Server response:', response.data);  // Debug log
-  
-      if (response.data.filename) {
-        const downloadUrl = `/download/${response.data.filename}`;
-        console.log('Setting download link:', downloadUrl);  // Debug log
-        setDownloadLink(downloadUrl);
-      } else {
-        console.error('No filename in response');
-        setError('Error: No filename received from server');
-      }
+      console.log('Upload response:', response.data);
+      setImages(response.data.images);
+      setIsEditing(true);
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error('Upload error:', err.response ? err.response.data : err.message);
       setError('An error occurred during upload. Please try again.');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleDescriptionChange = (index, newDescription) => {
+    const updatedImages = [...images];
+    updatedImages[index].description = newDescription;
+    setImages(updatedImages);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('/process', {
+        filename: file.name,
+        descriptions: images.map(img => ({
+          slide_number: img.slide_number,
+          shape_number: img.shape_number,
+          description: img.description
+        }))
+      });
+  
+      console.log('Process response:', response.data);
+  
+      if (response.data.filename) {
+        const downloadUrl = `/download/${response.data.filename}`;
+        console.log('Setting download link:', downloadUrl);
+        setDownloadLink(downloadUrl);
+        setIsEditing(false);
+      } else {
+        throw new Error('No filename in response');
+      }
+    } catch (err) {
+      console.error('Processing error:', err.response ? err.response.data : err.message);
+      setError('An error occurred while processing. Please try again.');
     }
   };
 
@@ -61,15 +95,26 @@ function App() {
       const response = await axios.get(downloadLink, {
         responseType: 'blob',
       });
+      
+      console.log('Download response:', response);
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'modified_presentation.pptx';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (filenameMatch.length === 2)
+          filename = filenameMatch[1];
+      }
+  
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'modified_presentation.pptx');
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error('Download failed:', error.response ? error.response.data : error.message);
       setError('Failed to download the file. Please try again.');
     }
   };
@@ -85,23 +130,40 @@ function App() {
         </div>
       )}
       
-      <div className="mb-4">
-        <input
-          type="file"
-          onChange={handleFileChange}
-          accept=".pptx"
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
-      </div>
-      
-      <button
-        onClick={handleUpload}
-        disabled={isUploading}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-      >
-        <Upload className="mr-2" />
-        {isUploading ? 'Uploading...' : 'Upload and Process'}
-      </button>
+      {!isEditing && (
+        <>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Description Type</label>
+            <select
+              value={promptType}
+              onChange={(e) => setPromptType(e.target.value)}
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option value="general">General</option>
+              <option value="exam">Exam</option>
+              <option value="dataStructures">Data Structures</option>
+            </select>
+          </div>
+  
+          <div className="mb-4">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept=".pptx"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+  
+          <button
+            onClick={handleUpload}
+            disabled={isUploading}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+          >
+            <Upload className="mr-2" />
+            {isUploading ? 'Uploading...' : 'Upload and Process'}
+          </button>
+        </>
+      )}
       
       {isUploading && (
         <div className="mt-4">
@@ -113,6 +175,14 @@ function App() {
           </div>
           <p className="text-center mt-2">{uploadProgress}% Uploaded</p>
         </div>
+      )}
+      
+      {isEditing && (
+        <ImageEditor
+          images={images}
+          onDescriptionChange={handleDescriptionChange}
+          onSubmit={handleSubmit}
+        />
       )}
       
       {downloadLink && (
