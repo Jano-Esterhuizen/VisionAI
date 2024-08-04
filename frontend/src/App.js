@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { AlertCircle, Upload, Download } from 'lucide-react';
+import { AlertCircle, Upload, Download, HelpCircle } from 'lucide-react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 import ImageEditor from './components/ImageEditor';
 
 function App() {
@@ -12,6 +14,19 @@ function App() {
   const [images, setImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [promptType, setPromptType] = useState('general');
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('hasSeenTour');
+    if (!hasSeenTour) {
+      setShowTour(true);
+    }
+  }, []);
+
+  const closeTour = () => {
+    setShowTour(false);
+    localStorage.setItem('hasSeenTour', 'true');
+  };
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -120,79 +135,137 @@ function App() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">PowerPoint Processor</h1>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-          <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline"> {error}</span>
+    <div className="min-h-screen bg-background font-sans">
+      <header className="bg-primary text-white py-4 shadow-md">
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <img src="/Visionary-Logo.png" alt="Visionary.AI Icon" className="h-10 md:hidden" />
+          <img src="/Visionary-Full.png" alt="Visionary.AI Logo" className="hidden md:block h-12" />
         </div>
-      )}
-      
-      {!isEditing && (
-        <>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Description Type</label>
-            <select
-              value={promptType}
-              onChange={(e) => setPromptType(e.target.value)}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        <nav className="hidden md:block">
+          {/* Add navigation items here if needed */}
+        </nav>
+      </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {!isEditing && (
+          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 className="text-2xl font-heading font-semibold mb-6 flex items-center">
+              Upload PowerPoint
+              <Tippy content="Upload a PowerPoint file to process">
+                <HelpCircle className="ml-2 text-gray-400 cursor-pointer" size={20} />
+              </Tippy>
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="promptType" className="block text-sm font-medium text-gray-700 mb-1">Description Type</label>
+                <select
+                  id="promptType"
+                  value={promptType}
+                  onChange={(e) => setPromptType(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="general">General</option>
+                  <option value="exam">Exam</option>
+                  <option value="dataStructures">Data Structures</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="fileUpload" className="block text-sm font-medium text-gray-700 mb-1">Select PowerPoint File</label>
+                <input
+                  id="fileUpload"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pptx"
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-light file:text-white hover:file:bg-primary"
+                />
+              </div>
+              <button
+                onClick={handleUpload}
+                disabled={isUploading || !file}
+                className={`w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center ${
+                  (!file || isUploading) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isUploading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2" />
+                    Upload and Process
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isUploading && (
+          <div className="mt-4">
+            <div className="bg-gray-200 rounded-full h-2.5 mb-2">
+              <div 
+                className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+                style={{width: `${uploadProgress}%`}}
+              ></div>
+            </div>
+            <p className="text-center text-sm text-gray-600">{uploadProgress}% Uploaded</p>
+          </div>
+        )}
+
+        {isEditing && (
+          <ImageEditor
+            images={images}
+            onDescriptionChange={handleDescriptionChange}
+            onSubmit={handleSubmit}
+          />
+        )}
+
+        {downloadLink && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleDownload}
+              className="bg-secondary hover:bg-secondary-dark text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out inline-flex items-center"
             >
-              <option value="general">General</option>
-              <option value="exam">Exam</option>
-              <option value="dataStructures">Data Structures</option>
-            </select>
+              <Download className="mr-2" />
+              Download Processed File
+            </button>
           </div>
-  
-          <div className="mb-4">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept=".pptx"
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
+        )}
+      </main>
+
+      {showTour && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Vision App!</h2>
+            <p className="mb-4">Here's a quick guide to get you started:</p>
+            <ol className="list-decimal list-inside mb-4">
+              <li>Upload a PowerPoint file</li>
+              <li>Choose a description type</li>
+              <li>Edit the generated descriptions</li>
+              <li>Download the processed file</li>
+            </ol>
+            <button
+              onClick={closeTour}
+              className="bg-primary text-white font-bold py-2 px-4 rounded"
+            >
+              Got it!
+            </button>
           </div>
-  
-          <button
-            onClick={handleUpload}
-            disabled={isUploading}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-          >
-            <Upload className="mr-2" />
-            {isUploading ? 'Uploading...' : 'Upload and Process'}
-          </button>
-        </>
-      )}
-      
-      {isUploading && (
-        <div className="mt-4">
-          <div className="bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full" 
-              style={{width: `${uploadProgress}%`}}
-            ></div>
-          </div>
-          <p className="text-center mt-2">{uploadProgress}% Uploaded</p>
         </div>
-      )}
-      
-      {isEditing && (
-        <ImageEditor
-          images={images}
-          onDescriptionChange={handleDescriptionChange}
-          onSubmit={handleSubmit}
-        />
-      )}
-      
-      {downloadLink && (
-        <button
-          onClick={handleDownload}
-          className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
-        >
-          <Download className="mr-2" />
-          Download Processed File
-        </button>
       )}
     </div>
   );
