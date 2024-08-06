@@ -1,3 +1,4 @@
+import logging
 import os
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
@@ -19,17 +20,32 @@ def extract_images_from_pptx(pptx_path, output_dir):
     return image_paths
 
 def insert_alt_text(pptx_path, descriptions):
+    logging.debug(f"Inserting alt text into {pptx_path}")
     prs = Presentation(pptx_path)
     
     for slide_number, shape_number, description in descriptions:
-        slide = prs.slides[slide_number]
-        shape = slide.shapes[shape_number]
-        if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
-            shape._element.xpath('./p:nvPicPr/p:cNvPr')[0].set('descr', description)
+        logging.debug(f"Processing slide {slide_number}, shape {shape_number}")
+        if 0 <= slide_number < len(prs.slides):
+            slide = prs.slides[slide_number]
+            if 0 <= shape_number < len(slide.shapes):
+                shape = slide.shapes[shape_number]
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                    shape._element.xpath('./p:nvPicPr/p:cNvPr')[0].set('descr', description)
+                else:
+                    logging.warning(f"Shape {shape_number} on slide {slide_number} is not a picture")
+            else:
+                logging.warning(f"Invalid shape number {shape_number} for slide {slide_number}")
+        else:
+            logging.warning(f"Invalid slide number {slide_number}")
     
     output_folder = current_app.config['OUTPUT_FOLDER']
     modified_pptx_path = os.path.join(output_folder, 'modified_' + os.path.basename(pptx_path))
-    print(f"Saving modified file to: {modified_pptx_path}")
+    logging.info(f"Saving modified file to: {modified_pptx_path}")
     prs.save(modified_pptx_path)
-    print(f"File saved successfully: {os.path.exists(modified_pptx_path)}")
+    
+    if os.path.exists(modified_pptx_path):
+        logging.info(f"File saved successfully: {modified_pptx_path}")
+    else:
+        logging.error(f"Failed to save file: {modified_pptx_path}")
+    
     return modified_pptx_path
