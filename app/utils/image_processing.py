@@ -19,7 +19,7 @@ def describe_image(image_path, prompt_type = 'general'):
             'system': "You are a helpful assistant that describes images for exam purposes.",
             'user': "Describe only the visual elements of this image without providing any context, information, or tips that could give an advantage in an exam setting."
         },
-        'dataStructures': {
+        'Data Structures': {
             'system': "You are a helpful assistant that only describes images related to data structures.",
             'user': "if this image is related to data structures, Describe this image focusing only on identifying and describing data structures, trees, lists, and related concepts. Respond with N/A if the image is not directly related to data structures."
         }

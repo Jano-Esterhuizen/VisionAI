@@ -15,3 +15,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.bg-gradient-custom {
+  background: 
+    radial-gradient(circle at top left, #014890 0%, #1d3055c8 20%, rgba(0,0,0,0) 50%),
+    radial-gradient(circle at bottom right, #207071b7 4%, #174c50f4 10%, rgba(0,0,0,0) 55%),
+    #020213;
+}

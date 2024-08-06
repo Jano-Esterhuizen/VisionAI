@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
 import axios from 'axios';
-import { AlertCircle, Upload, Download, HelpCircle } from 'lucide-react';
+import { AlertCircle, Upload, Download, HelpCircle, RefreshCw } from 'lucide-react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import ImageEditor from './components/ImageEditor';
+import { useDropzone } from 'react-dropzone';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -15,6 +16,17 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [promptType, setPromptType] = useState('general');
   const [showTour, setShowTour] = useState(false);
+
+  const resetProcess = () => {
+    setFile(null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setDownloadLink(null);
+    setError(null);
+    setImages([]);
+    setIsEditing(false);
+    setPromptType('General');  // Reset to default prompt type
+  };
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('hasSeenTour');
@@ -28,9 +40,22 @@ function App() {
     localStorage.setItem('hasSeenTour', 'true');
   };
 
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles && acceptedFiles.length > 0) {
+      setFile(acceptedFiles[0]);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: '.pptx',
+    multiple: false
+  });
+
+  
+
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    setError(null);
   };
 
   const handleUpload = async () => {
@@ -135,115 +160,138 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans">
-      <header className="bg-primary text-white py-4 shadow-md">
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center">
-          <img src="/Visionary-Logo.png" alt="Visionary.AI Icon" className="h-10 md:hidden" />
-          <img src="/Visionary-Full.png" alt="Visionary.AI Logo" className="hidden md:block h-12" />
-        </div>
-        <nav className="hidden md:block">
-          {/* Add navigation items here if needed */}
-        </nav>
+    <div className="min-h-screen bg-gradient-custom text-white font-sans">
+  <header className="bg-transparent py-4">
+    <div className="container mx-auto px-1 flex items-center">
+      <img src="/Visionary-Logo.png" alt="Visionary.AI Logo" className="h-10 filter drop-shadow-md" />
+      <span className="ml-2 text-white text-xl font-bold tracking-wide filter drop-shadow-md">VISIONARY.AI</span>
+    </div>
+  </header>
+
+      
+
+  <main className="container mx-auto px-4 py-8">
+      <div className="w-full flex justify-center">
+        <h1 className="max-w-[600px] mx-auto text-center">
+          <span className="block text-3xl sm:text-4xl leading-tight font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#44BCFF] to-[#80FFD1]">
+            Give a PowerPoint and Receive Descriptions
+          </span>
+        </h1>
       </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-            <p className="font-bold">Error</p>
-            <p>{error}</p>
-          </div>
-        )}
+      {error && (
+        <div className="max-w-2xl mx-auto mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
 
-        {!isEditing && (
-          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-            <h2 className="text-2xl font-heading font-semibold mb-6 flex items-center">
-              Upload PowerPoint
-              <Tippy content="Upload a PowerPoint file to process">
-                <HelpCircle className="ml-2 text-gray-400 cursor-pointer" size={20} />
-              </Tippy>
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="promptType" className="block text-sm font-medium text-gray-700 mb-1">Description Type</label>
-                <select
-                  id="promptType"
-                  value={promptType}
-                  onChange={(e) => setPromptType(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+      {!downloadLink ? (
+        <div className="space-y-6 max-w-2xl mx-auto mt-8">
+          {/* Description Type Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Description Type</label>
+            <div className="flex justify-center space-x-2">
+              {['General', 'Exam', 'Data Structures'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setPromptType(type)}
+                  className={`px-4 py-2 rounded-full ${
+                    promptType === type ? 'bg-primary text-white' : 'bg-opacity-20 bg-white text-white hover:bg-opacity-30'
+                  }`}
                 >
-                  <option value="general">General</option>
-                  <option value="exam">Exam</option>
-                  <option value="dataStructures">Data Structures</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="fileUpload" className="block text-sm font-medium text-gray-700 mb-1">Select PowerPoint File</label>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pptx"
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-light file:text-white hover:file:bg-primary"
-                />
-              </div>
-              <button
-                onClick={handleUpload}
-                disabled={isUploading || !file}
-                className={`w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center ${
-                  (!file || isUploading) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isUploading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2" />
-                    Upload and Process
-                  </>
-                )}
-              </button>
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
-        )}
 
-        {isUploading && (
-          <div className="mt-4">
-            <div className="bg-gray-200 rounded-full h-2.5 mb-2">
-              <div 
-                className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out" 
-                style={{width: `${uploadProgress}%`}}
-              ></div>
+          {/* File Upload Area */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Select PowerPoint File</label>
+            <div 
+              {...getRootProps()} 
+              className={`p-6 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors ${
+                isDragActive ? 'border-primary bg-primary bg-opacity-10' : 'border-gray-300 hover:border-primary'
+              }`}
+            >
+              <input {...getInputProps()} onChange={handleFileChange} />
+              {isDragActive ? (
+                <p className="text-primary">Drop the PowerPoint file here...</p>
+              ) : (
+                <div>
+                  <p>Drag and drop a PowerPoint file here, or click to select</p>
+                  <button className="mt-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark">
+                    Choose File
+                  </button>
+                </div>
+              )}
+              {file && (
+                <p className="mt-2 text-sm text-gray-300">
+                  Selected file: {file.name}
+                </p>
+              )}
             </div>
-            <p className="text-center text-sm text-gray-600">{uploadProgress}% Uploaded</p>
           </div>
-        )}
 
-        {isEditing && (
-          <ImageEditor
-            images={images}
-            onDescriptionChange={handleDescriptionChange}
-            onSubmit={handleSubmit}
-          />
-        )}
-
-        {downloadLink && (
-          <div className="mt-6 text-center">
+          {/* Upload Button */}
+          <button
+            onClick={handleUpload}
+            disabled={isUploading || !file}
+            className={`w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out flex items-center justify-center ${
+              (!file || isUploading) ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {isUploading ? (
+              'Uploading...'
+            ) : (
+              <>
+                <Upload className="mr-2" />
+                Upload and Process
+              </>
+            )}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-6 flex flex-col items-center">
+          <p className="text-xl mb-4">Your file has been processed successfully!</p>
+          <div className="flex space-x-4">
             <button
               onClick={handleDownload}
-              className="bg-secondary hover:bg-secondary-dark text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out inline-flex items-center"
+              className="bg-secondary hover:bg-secondary-dark text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out inline-flex items-center"
             >
               <Download className="mr-2" />
               Download Processed File
             </button>
+            <button
+              onClick={resetProcess}
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out inline-flex items-center"
+            >
+              <RefreshCw className="mr-2" />
+              Start Over
+            </button>
           </div>
+        </div>
+      )}
+
+      {isEditing && (
+        <ImageEditor
+          images={images}
+          onDescriptionChange={handleDescriptionChange}
+          onSubmit={handleSubmit}
+        />
+      )}
+
+      {isUploading && (
+        <div className="mt-4 max-w-2xl mx-auto">
+          <div className="bg-gray-200 rounded-full h-2.5 mb-2">
+            <div 
+              className="bg-primary h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+              style={{width: `${uploadProgress}%`}}
+            ></div>
+          </div>
+          <p className="text-center text-sm text-gray-300">{uploadProgress}% Uploaded</p>
+        </div>
         )}
       </main>
 
