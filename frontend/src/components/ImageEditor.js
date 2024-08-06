@@ -2,12 +2,12 @@ import React from 'react';
 
 const ImageEditor = ({ images, onDescriptionChange, onSubmit }) => {
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+    <div className="bg-opacity-20 bg-black shadow-2xl rounded-lg p-6 mb-6">
       <h2 className="text-2xl font-heading font-semibold mb-6">Edit Image Descriptions</h2>
       <div className="space-y-6">
         {images.map((image, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4">
-            <p className="text-sm text-gray-600 mb-2">Slide: {image.slide_number}, Shape: {image.shape_number}</p>
+          <div key={index} className="bg-white border-4 border-black rounded-lg p-5">
+            <p className="text-sm text-black mb-2">Slide: {image.slide_number}, Shape: {image.shape_number}</p>
             <div className="flex flex-col lg:flex-row lg:space-x-4">
               <img 
                 src={`/api/images/${image.image_path}`} 
@@ -22,9 +22,10 @@ const ImageEditor = ({ images, onDescriptionChange, onSubmit }) => {
                   id={`description-${index}`}
                   value={image.description}
                   onChange={(e) => onDescriptionChange(index, e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-black" // Add `text-black` to change text color to black
                   rows="4"
                 />
+
               </div>
             </div>
           </div>

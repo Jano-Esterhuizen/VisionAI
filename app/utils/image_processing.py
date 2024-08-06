@@ -11,11 +11,11 @@ def describe_image(image_path, prompt_type = 'general'):
     base64_image = encode_image(image_path)
 
     prompts = {
-        'general': {
+        'General': {
             'system': "You are a helpful assistant that describes images for visually impaired users.",
             'user': "Describe this image in detail for a visually impaired person."
         },
-        'exam': {
+        'Exam': {
             'system': "You are a helpful assistant that describes images for exam purposes.",
             'user': "Describe only the visual elements of this image without providing any context, information, or tips that could give an advantage in an exam setting."
         },

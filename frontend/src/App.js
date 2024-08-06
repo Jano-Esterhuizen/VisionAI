@@ -197,7 +197,7 @@ function App() {
                   key={type}
                   onClick={() => setPromptType(type)}
                   className={`px-4 py-2 rounded-full ${
-                    promptType === type ? 'bg-primary text-white' : 'bg-opacity-20 bg-white text-white hover:bg-opacity-30'
+                    promptType === type ? 'bg-primary text-white' : 'bg-opacity-20 bg-other text-white hover:bg-opacity-40'
                   }`}
                 >
                   {type}
@@ -211,8 +211,8 @@ function App() {
             <label className="block text-sm font-medium mb-2">Select PowerPoint File</label>
             <div 
               {...getRootProps()} 
-              className={`p-6 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors ${
-                isDragActive ? 'border-primary bg-primary bg-opacity-10' : 'border-gray-300 hover:border-primary'
+              className={`p-20 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors ${
+                isDragActive ? 'border-primary bg-primary bg-opacity-10' : 'border-gray-300 hover:border-primary-light'
               }`}
             >
               <input {...getInputProps()} onChange={handleFileChange} />
@@ -221,7 +221,7 @@ function App() {
               ) : (
                 <div>
                   <p>Drag and drop a PowerPoint file here, or click to select</p>
-                  <button className="mt-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark">
+                  <button className="mt-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-light">
                     Choose File
                   </button>
                 </div>
@@ -238,7 +238,7 @@ function App() {
           <button
             onClick={handleUpload}
             disabled={isUploading || !file}
-            className={`w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out flex items-center justify-center ${
+            className={`w-full bg-primary hover:bg-primary-light text-white font-bold py-3 px-4 rounded-full transition duration-300 ease-in-out flex items-center justify-center ${
               (!file || isUploading) ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
@@ -275,11 +275,13 @@ function App() {
       )}
 
       {isEditing && (
+        <div className="py-6">
         <ImageEditor
           images={images}
           onDescriptionChange={handleDescriptionChange}
           onSubmit={handleSubmit}
         />
+      </div>
       )}
 
       {isUploading && (
