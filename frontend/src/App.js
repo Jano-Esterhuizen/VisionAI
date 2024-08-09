@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback} from 'react';
+import Login from './components/Login';
 import axios from 'axios';
 import { AlertCircle, Upload, Download, HelpCircle, RefreshCw } from 'lucide-react';
 import Tippy from '@tippyjs/react';
@@ -161,23 +162,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-custom text-white font-sans">
-  <header className="bg-transparent py-4">
-    <div className="container mx-auto px-1 flex items-center">
-      <img src="/Visionary-Logo.png" alt="Visionary.AI Logo" className="h-10 filter drop-shadow-md" />
-      <span className="ml-2 text-white text-xl font-bold tracking-wide filter drop-shadow-md">VISIONARY.AI</span>
-    </div>
-  </header>
+      <Login />
+      <header className="bg-transparent py-4">
+        <div className="container mx-auto px-1 flex items-center">
+          <img src="/Visionary-Logo.png" alt="Visionary.AI Logo" className="h-10 filter drop-shadow-md" />
+          <span className="ml-2 text-white text-xl font-bold tracking-wide filter drop-shadow-md">VISIONARY.AI</span>
+        </div>
+      </header>
 
       
 
-  <main className="container mx-auto px-4 py-8">
-      <div className="w-full flex justify-center">
-        <h1 className="max-w-[600px] mx-auto text-center">
-          <span className="block text-3xl sm:text-4xl leading-tight font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#44BCFF] to-[#80FFD1]">
-            Give a PowerPoint and Receive Descriptions
-          </span>
-        </h1>
-      </div>
+      <main className="container mx-auto px-4 py-8">
+        <div className="w-full flex justify-center">
+          <h1 className="max-w-[600px] mx-auto text-center">
+            <span className="block text-3xl sm:text-4xl leading-tight font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#44BCFF] to-[#80FFD1]">
+              Give a PowerPoint and Receive Descriptions
+            </span>
+          </h1>
+        </div>
 
       {error && (
         <div className="max-w-2xl mx-auto mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
