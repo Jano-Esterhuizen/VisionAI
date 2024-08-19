@@ -1,6 +1,6 @@
-# PowerPoint Processor
+# Visionary.AI
 
-PowerPoint Processor is a web application that allows users to upload PowerPoint files, process images within them, and add AI-generated descriptions as alt text. It consists of a Flask backend for file processing and a React frontend for user interaction.
+Visionary.AI is a web application that allows users to upload PowerPoint files, process images within them, and add AI-generated descriptions as alt text. It consists of a Flask backend for file processing and a React frontend for user interaction.
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
