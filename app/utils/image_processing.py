@@ -12,16 +12,16 @@ def describe_image(image_path, prompt_type = 'general'):
 
     prompts = {
         'General': {
-            'system': "You are a helpful assistant that describes images for visually impaired users.",
-            'user': "Describe this image in detail for a visually impaired person."
+            'system': "You are a helpful assistant that describes images.",
+            'user': "Provide a thorough visual description of this image, detailing its composition, structure and how each element is precisely related to each other with context. Give the response in paragraph form"
         },
         'Exam': {
-            'system': "You are a helpful assistant that describes images for exam purposes.",
-            'user': "Describe only the visual elements of this image without providing any context, information, or tips that could give an advantage in an exam setting."
+            'system': "You are a helpful assistant that describes images.",
+            'user': "Describe this image in high detail and include all visual aspects without providing any context, information, or tips that could give an advantage in an exam setting."
         },
         'Data Structures': {
-            'system': "You are a helpful assistant that only describes images related to data structures.",
-            'user': "if this image is related to data structures, Describe this image focusing only on identifying and describing data structures, trees, lists, and related concepts. Respond with N/A if the image is not directly related to data structures."
+            'system': "You are a helpful assistant that only describess.",
+            'user': "if this image is related to data structures, describe this image in high detail and include all visual aspects. Respond with N/A if the image is not directly related to data structures."
         }
     }
 

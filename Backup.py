@@ -16,10 +16,7 @@ OUTPUT_FOLDER = 'output'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Set the OpenAI API key directly
-#api_key = "sk-proj-LJeu94xe89yVZjR7fkm1T3BlbkFJbSE3yJPrkExnDGpqwMiR"
-#openai.api_key = api_key
-client = OpenAI(api_key= "sk-proj-LJeu94xe89yVZjR7fkm1T3BlbkFJbSE3yJPrkExnDGpqwMiR")
+client = OpenAI(api_key= "")
 
 # Function to encode an image as a base64 string
 def encode_image(image_path):

@@ -4,7 +4,6 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
     OUTPUT_FOLDER = os.path.join(BASE_DIR, 'output')
-    OPENAI_API_KEY = "sk-proj-LJeu94xe89yVZjR7fkm1T3BlbkFJbSE3yJPrkExnDGpqwMiR"
     REACT_BUILD_FOLDER = os.path.join(BASE_DIR, 'frontend', 'build')
     
     @staticmethod
