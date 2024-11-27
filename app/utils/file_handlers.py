@@ -3,6 +3,7 @@ import os
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from flask import current_app
+from PIL import Image
 
 def extract_images_from_pptx(pptx_path, output_dir):
     prs = Presentation(pptx_path)
@@ -49,3 +50,9 @@ def insert_alt_text(pptx_path, descriptions):
         logging.error(f"Failed to save file: {modified_pptx_path}")
     
     return modified_pptx_path
+
+def save_image(image_data, filename):
+    image_path = os.path.join('static', 'images', filename)
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    image_data.save(image_path)
+    return image_path
